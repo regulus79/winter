@@ -11,6 +11,4 @@ minetest.register_on_mods_loaded(function()
 			core.register_biome(biome)
 		end
 	end
-	print("After")
-	print(dump(core.registered_biomes))
 end)
