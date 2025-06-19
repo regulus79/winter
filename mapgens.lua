@@ -1,0 +1,16 @@
+
+minetest.register_on_mods_loaded(function()
+	old_biomes = {}
+	for i,v in pairs(core.registered_biomes) do
+		old_biomes[i] = v
+	end
+	core.clear_registered_biomes()
+	for _, biome in pairs(old_biomes) do
+		print(biome.name, string.find(biome.name, "snow") or string.find(biome.name, "ice"))
+		if string.find(biome.name, "snow") or string.find(biome.name, "ice") then
+			core.register_biome(biome)
+		end
+	end
+	print("After")
+	print(dump(core.registered_biomes))
+end)
