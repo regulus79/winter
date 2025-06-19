@@ -14,18 +14,16 @@ core.register_on_joinplayer(function(player)
 		offset = {x = -265 + 265 + 24, y = -89},
 		size = {x = 24, y = 24},
 		text = "winter_stat_snowflake.png",
-		text2 = "winter_stat_warm.png",
 		number = player:get_meta():get_float("cold_stat"),
-		item = 16,
 	})
 	player_infotext_ids[player:get_player_name()] = player:hud_add({
 		type = "text",
 		position = {x = 0.5, y = 1},
-		offset = {x = 0, y = -110},
+		offset = {x = 0, y = -120},
 		size = {x = 1, y = 0},
-		alignment = {x = 0, y = 0},
+		alignment = {x = 0, y = -1},
 		text = "",
-		number = player:get_meta():get_float("cold_stat"),
+		z_index = 100,
 	})
 	player_vingette_targets[player:get_player_name()] = 0
 	player_vingette_current[player:get_player_name()] = 0
@@ -43,7 +41,28 @@ end)
 local infotext_string = function(player)
 	local current_body_temp = player:get_meta():get_float("body_temperature")
 	local feels_like_temp = winter.feels_like_temp(player:get_pos() + vector.new(0,1,0))
-	return string.format("Body Temp: %.1f\nFeels like: %.1f", current_body_temp, feels_like_temp)
+	local wetness = player:get_meta():get_float("wetness")
+	local output = ""
+	if current_body_temp < winter.deadly_body_temperature then
+		output = output .. minetest.colorize("#7777cc", string.format("Body Temp: %.1f (!!!)", current_body_temp))
+	elseif current_body_temp < winter.chilly_body_temperature then
+		output = output .. minetest.colorize("#aaaacc", string.format("Body Temp: %.1f (!!)", current_body_temp))
+	elseif current_body_temp < winter.decent_body_temperature then
+		output = output .. minetest.colorize("#ccaaaa", string.format("Body Temp: %.1f (!)", current_body_temp))
+	else
+		output = output .. minetest.colorize("#ffaaaa", string.format("Body Temp: %.1f", current_body_temp))
+	end
+	output = output .. string.format("\nFeels like: %.1f", feels_like_temp)
+	if wetness > 0.7 then
+		output = output .. minetest.colorize("#5555ff", "\nSopping wet (!!!)")
+	elseif wetness > 0.5 then
+		output = output .. minetest.colorize("#7777ee", "\nVery wet (!!)")
+	elseif wetness > 0.2 then
+		output = output .. minetest.colorize("#9999dd", "\nWet (!)")
+	elseif wetness > 0 then
+		output = output .. minetest.colorize("#aaaacc", "\nDamp")
+	end
+	return output
 end
 
 

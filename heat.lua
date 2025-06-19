@@ -4,7 +4,8 @@
 winter.heat_nodes = {
 	["fire:permanent_flame"] = 70,
 	["fire:basic_flame"] = 70,
-	["default:torch"] = 10,
+	["default:torch_wall"] = 5,
+	["default:torch"] = 5,
 }
 local heat_nodenames = {}
 for k,_ in pairs(winter.heat_nodes) do heat_nodenames[#heat_nodenames + 1] = k end
