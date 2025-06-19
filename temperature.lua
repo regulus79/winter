@@ -1,9 +1,47 @@
 
 
-winter.body_temp = 37
--- TODO: change to function to allow different clothing to affect cold tolerance
-winter.body_tolerable_temp = 10
+--
+-- Body Temperature
+--
 
+winter.target_body_temperature = 37
+winter.deadly_body_temperature = 10
+-- TODO: change to function to allow different clothing to affect cold tolerance
+winter.default_body_heat_loss_rate = 0.01
+winter.default_metabolism_rate = 0.1
+
+winter.metabolism = function(player)
+	local food_supply = 1 -- TODO add hunger
+	if food_supply <= 0 then
+		return 0
+	end
+	local metabolism_rate = player:get_meta():get_float("metabolism_rate")
+	local body_temp = player:get_meta():get_float("body_temperature")
+	minetest.debug("Metabolism: temp difference: ", winter.target_body_temperature - body_temp)
+	return math.sign(winter.target_body_temperature - body_temp) * metabolism_rate
+end
+
+-- Returns the rate of change in body temp
+-- Heat loss rate depends on the clothing being worn
+winter.change_in_body_temp = function(player)
+	local external_temp = winter.feels_like_temp(player:get_pos() + vector.new(0,1,0))
+	local current_body_temp = player:get_meta():get_float("body_temperature")
+	local heat_loss_rate = player:get_meta():get_float("body_heat_loss_rate")
+	local metabolism = winter.metabolism(player)
+	local temp_difference = external_temp - current_body_temp
+	local temp_change = heat_loss_rate * temp_difference + metabolism
+	minetest.debug("External Temp:", external_temp)
+	minetest.debug("Body Temp:", current_body_temp)
+	minetest.debug("Temp Difference:", temp_difference)
+	minetest.debug("Heat Loss:", heat_loss_rate * temp_difference)
+	minetest.debug("Metabolism:", metabolism)
+	return temp_change
+end
+
+
+--
+-- Shelter
+--
 
 local ray_length = 3
 local ray_directions = {
@@ -49,17 +87,32 @@ winter.sheltered = function(pos)
 	return (temp_sheltered_score / #ray_directions), (wind_sheltered_score / #ray_directions)
 end
 
-winter.outside_temperature = function(pos)
+
+--
+-- "Feels Like" Temperature
+--
+
+-- Returns the current temperature due to weather variations at pos
+-- Does not take into account the terrain, wind, or fire
+-- TODO move to weather.lua
+winter.raw_outside_temperature = function(pos)
 	return -20
 end
 
+-- Returns the temperature at pos due to fire, body warmth, etc.
+-- Unlike winter.raw_outside_temperature, which handles the weather
+winter.specific_temperature = function(pos)
+	return 25
+end
+
 local wind_chill_weight = 1
-local shelter_weight = 0.5
+local shelter_weight = 1
 
 winter.feels_like_temp = function(pos)
 	local shelter, wind_shelter = winter.sheltered(pos)
-	local real_outside_temp = winter.outside_temperature(pos)
-	local outside_chill = real_outside_temp + shelter * (winter.body_temp - real_outside_temp) * shelter_weight
+	local real_outside_temp = winter.raw_outside_temperature(pos)
+	-- Lerp between outside temp and inside temp based on shelter ratio
+	local outside_chill = real_outside_temp + shelter * (winter.specific_temperature(pos) - real_outside_temp) * shelter_weight
 	local wind_chill = -(1 - wind_shelter) * winter.wind(pos):length() * wind_chill_weight
 	return outside_chill + wind_chill
 end
