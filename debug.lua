@@ -19,6 +19,7 @@ local debug_string = function(player)
 	local metabolism = winter.metabolism(player)
 	local temp_change = heat_loss_rate * temp_difference + metabolism
 	info = {
+		"Weather Intensity:\n   " .. tostring(winter.general_weather_intensity(pos)),
 		"External Temp:\n   " .. tostring(real_outside_temp),
 		"Local Temp:\n   " .. tostring(local_temperature),
 		"Feels like temp:\n   " .. tostring(feels_like_temp),

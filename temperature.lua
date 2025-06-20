@@ -12,7 +12,7 @@ winter.deadly_body_temperature = 10
 winter.default_body_heat_loss_rate = 0.01
 winter.default_metabolism_rate = 0.1
 
-winter.cold_hp_loss_rate = 0.1
+winter.cold_hp_loss_rate_per_degree = 0.1
 
 winter.wetness_heat_loss_rate = 0.1
 
@@ -51,11 +51,12 @@ end
 winter.set_body_temp = function(player, temp, deltatime)
 	player:get_meta():set_float("body_temperature", temp)
 	if temp < winter.deadly_body_temperature then
-		local hp_loss = winter.cold_hp_loss_rate * deltatime
+		local hp_loss = winter.cold_hp_loss_rate_per_degree * (winter.deadly_body_temperature - temp) * deltatime
+		minetest.debug(hp_loss)
 		if hp_loss < 1 then
-			hp_loss = (math.random() < hp_loss and 1 or 0)
+			hp_loss = (math.random() < hp_loss) and 1 or 0
 		end
-		player:set_hp(player:get_hp() - hp_loss * deltatime)
+		player:set_hp(player:get_hp() - hp_loss)
 	end
 end
 
@@ -112,13 +113,8 @@ end
 -- "Feels Like" Temperature
 --
 
--- Returns the current temperature due to weather variations at pos
--- Does not take into account the terrain, wind, or fire
--- TODO move to weather.lua
-winter.raw_outside_temperature = function(pos)
-	return -20
-end
-
+-- Returns the total temperature from both the weather and heat sources (fire, torches, etc)
+-- Does not take into account wind or shelter
 winter.total_temperature = function(pos)
 	local raw_outside_temp = winter.raw_outside_temperature(pos)
 	local local_temperature = winter.specific_temperature(pos)
@@ -129,12 +125,14 @@ end
 local wind_chill_weight = 1
 local shelter_weight = 1
 
+-- Combine the total temperature (weather + heat sources) with the wind chill and shelter ratio
 winter.feels_like_temp = function(pos)
 	local shelter, wind_shelter = winter.sheltered(pos)
+	-- Total heat, from weather and nodes/players
 	local actual_temp = winter.total_temperature(pos)
-	-- Local heat given off by players, fire, torches, etc
+	-- Heat only given off by players, fire, torches, etc
 	local local_temperature = winter.specific_temperature(pos)
-	-- Lerp between actual temp and inside temp based on shelter ratio
+	-- Lerp between actual temp and heat source temp based on shelter ratio
 	local outside_chill = actual_temp + shelter * (local_temperature - actual_temp) * shelter_weight
 	local wind_chill = -(1 - wind_shelter) * winter.wind(pos):length() * wind_chill_weight
 	return outside_chill + wind_chill
