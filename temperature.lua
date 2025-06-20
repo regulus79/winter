@@ -64,24 +64,21 @@ end
 -- Shelter
 --
 
-local ray_length = 5
+local ray_length = 8
 local ray_directions = {
-	vector.new(1,0,0):normalize(),
-	vector.new(1,0,1):normalize(),
-	vector.new(0,0,1):normalize(),
-	vector.new(-1,0,1):normalize(),
-	vector.new(-1,0,0):normalize(),
-	vector.new(-1,0,-1):normalize(),
-	vector.new(0,0,-1):normalize(),
-	vector.new(1,0,-1):normalize(),
-
-	vector.new(1,1,0):normalize(),
-	vector.new(-1,1,0):normalize(),
-	vector.new(0,1,1):normalize(),
-	vector.new(0,1,-1):normalize(),
-
 	vector.new(0,1,0):normalize(),
+	vector.new(0,-1,0):normalize(),
 }
+
+for i = 1,16 do
+	table.insert(ray_directions, vector.new(math.cos(2 * math.pi * i / 16), 0.3, math.sin(2 * math.pi * i / 16)):normalize())
+	table.insert(ray_directions, vector.new(math.cos(2 * math.pi * i / 16), -0.3, math.sin(2 * math.pi * i / 16)):normalize())
+end
+for i = 1,8 do
+	table.insert(ray_directions, vector.new(math.cos(2 * math.pi * i / 8), 2, math.sin(2 * math.pi * i / 8)):normalize())
+	table.insert(ray_directions, vector.new(math.cos(2 * math.pi * i / 8), -2, math.sin(2 * math.pi * i / 8)):normalize())
+end
+
 local ray_pointabilities = {
 	nodes = {
 		["group:leaves"] = false,

@@ -4,15 +4,17 @@
 winter.heat_nodes = {
 	["fire:permanent_flame"] = 70,
 	["fire:basic_flame"] = 70,
-	["default:torch_wall"] = 5,
-	["default:torch"] = 5,
+	["default:torch_wall"] = 3,
+	["default:torch"] = 3,
+	["default:furnace_active"] = 50,
 }
 local heat_nodenames = {}
 for k,_ in pairs(winter.heat_nodes) do heat_nodenames[#heat_nodenames + 1] = k end
 
 
 local heat_dropoff_curve = function(distance)
-	return 4 / (4 + distance + 1)
+	-- Not doing a real 1/x^2 curve since that isn't nice around the origin. This way you don't get infinite heat when you go up close to it
+	return 1 / (1 + distance^2)
 end
 
 -- Returns the temperature at pos due to fire, body warmth, etc.

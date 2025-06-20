@@ -104,9 +104,12 @@ winter.register_timer("temperature_update", 0, function(dtime)
 		local body_temp_change_rate = winter.change_in_body_temp(player)
 		-- TODO move this out of gui.lua
 		-- Disable overheating with math.min
-		local new_body_temp = math.min(player:get_meta():get_float("body_temperature") + body_temp_change_rate * dtime, winter.target_body_temperature)
-		winter.set_body_temp(player, new_body_temp, dtime)
-		winter.apply_hunger(player, winter.metabolism(player) * winter.hunger_per_metabolism * dtime)
+		local new_body_temp = player:get_meta():get_float("body_temperature")
+		if not winter.invincible_players[player:get_player_name()] then
+			new_body_temp = math.min(player:get_meta():get_float("body_temperature") + body_temp_change_rate * dtime, winter.target_body_temperature)
+			winter.set_body_temp(player, new_body_temp, dtime)
+			winter.apply_hunger(player, winter.metabolism(player) * winter.hunger_per_metabolism * dtime)
+		end
 
 		-- Update statbar
 		local new_cold_stat = temp_to_stat(new_body_temp)

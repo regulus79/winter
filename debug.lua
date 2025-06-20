@@ -30,8 +30,11 @@ local debug_string = function(player)
 	local predicted_steady_body_temp = feels_like_temp + predicted_steady_temp_difference
 	info = {
 		"Weather Intensity:\n   " .. tostring(winter.general_weather_intensity(pos)),
+		"Wind Speed:\n   " .. tostring(winter.wind(pos):length()),
 		"External Temp:\n   " .. tostring(real_outside_temp),
 		"Local Temp:\n   " .. tostring(local_temperature),
+		"Temp Sheltered:\n   " .. tostring(winter.get_cached(player, "temp_sheltered")),
+		"Wind Sheltered:\n   " .. tostring(winter.get_cached(player, "wind_sheltered")),
 		"Feels like temp:\n   " .. tostring(feels_like_temp),
 		"Body Temp:\n   " .. tostring(current_body_temp),
 		"Temp Difference:\n   " .. tostring(temp_difference),
@@ -49,10 +52,10 @@ end
 core.register_on_joinplayer(function(player)
 	player_debug_ids[player:get_player_name()] = player:hud_add({
 		type = "text",
-		position = {x = 0, y = 0.3},
+		position = {x = 0, y = 0.2},
 		offset = {x = 24, y = 0},
 		size = {x = 1, y = 0},
-		alignment = {x = 1, y = 0},
+		alignment = {x = 1, y = 1},
 		number = 0x33AAFF,
 		text = ""
 	})
@@ -78,5 +81,27 @@ core.register_chatcommand("debuginfo", {
 	description = "Toggle the winter debug display (temperature, wetness, heat loss, metabolism, etc) for your player",
 	func = function(name, param)
 		player_debug_enabled[name] = not player_debug_enabled[name]
+	end
+})
+
+
+--
+-- Admin commands
+--
+
+winter.invincible_players = {}
+
+core.register_chatcommand("alwayswarm", {
+	description = "Make player invincible to cold",
+	func = function(name, param)
+		winter.invincible_players[name] = not winter.invincible_players[name]
+		if winter.invincible_players[name] then
+			core.chat_send_player(name, "You are now invincible to cold!")
+		else
+			core.chat_send_player(name, "You are now invincible to cold!")
+		end
+		local player = core.get_player_by_name(name)
+		player:get_meta():set_float("body_temperature", winter.target_body_temperature)
+		player:get_meta():set_float("wetness", 0)
 	end
 })

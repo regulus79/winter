@@ -25,7 +25,7 @@ end)
 winter.register_timer("wind_force", 0, function(dtime)
 	for _, player in pairs(core.get_connected_players()) do
 		local wind = winter.wind(player:get_pos())
-		if wind:length() > 2 then
+		if wind:length() > 8 then
 			local wind_shelter_ratio = 1 - winter.get_cached(player, "wind_sheltered")
 			local player_vel_along_wind = (player:get_velocity() / wind:length()):dot(wind:normalize())
 			local wind_accel = wind * wind_shelter_ratio * winter.wind_force * (1 - player_vel_along_wind)
