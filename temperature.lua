@@ -25,8 +25,9 @@ winter.metabolism = function(player)
 	end
 	local metabolism_rate = player:get_meta():get_float("metabolism_rate")
 	local body_temp = player:get_meta():get_float("body_temperature")
-	-- TODO maybe in the future add sweating to cool yourself? Currently you can't overheat
-	return metabolism_rate
+	local temp_difference = winter.target_body_temperature - body_temp
+	-- Using min/max clamp to ramp down metabolism as you approach normal temp
+	return math.max(-metabolism_rate, math.min(metabolism_rate, temp_difference * metabolism_rate))
 end
 
 winter.heat_loss_rate = function(player)
