@@ -9,7 +9,7 @@ winter.decent_body_temperature = 30
 winter.chilly_body_temperature = 20
 winter.deadly_body_temperature = 10
 -- TODO: change to function to allow different clothing to affect cold tolerance
-winter.default_body_heat_loss_rate = 0.01
+winter.default_body_heat_loss_rate = 0.005
 winter.default_metabolism_rate = 0.1
 
 winter.cold_hp_loss_rate_per_degree = 0.1

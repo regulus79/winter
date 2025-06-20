@@ -23,10 +23,11 @@ core.register_globalstep(function(dtime)
 	for _, player in pairs(core.get_connected_players()) do
 		-- Wind acceleration
 		local wind = winter.wind(player:get_pos())
-		local wind_shelter_ratio = 1 - (wind_shelter_cache[player:get_player_name()] or 0)
-		local player_vel_along_wind = (player:get_velocity() / wind:length()):dot(wind:normalize())
-		player:add_velocity(wind * wind_shelter_ratio * winter.wind_force * (1 - player_vel_along_wind) * dtime)
-
+		if wind:length() > 2 then
+			local wind_shelter_ratio = 1 - (wind_shelter_cache[player:get_player_name()] or 0)
+			local player_vel_along_wind = (player:get_velocity() / wind:length()):dot(wind:normalize())
+			player:add_velocity(wind * wind_shelter_ratio * winter.wind_force * (1 - player_vel_along_wind) * dtime)
+		end
 	end
 
 	physics_update_timer = physics_update_timer + dtime

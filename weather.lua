@@ -47,10 +47,8 @@ end
 -- Returns the current temperature due to weather variations/altitude at pos
 -- Does not take into account the shelter, wind, or fire
 winter.raw_outside_temperature = function(pos)
-	local base_temp = 0 - 20 * winter.general_weather_intensity(pos)
-	-- yes technically we already accounted for the altitude in the normal weather intensity but..... still idk
-	local altitude_temp = -pos.y / 10
-	return base_temp + altitude_temp
+	local base_temp = -20 * winter.general_weather_intensity(pos)
+	return base_temp
 end
 
 

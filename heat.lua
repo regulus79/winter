@@ -16,6 +16,7 @@ local heat_dropoff_curve = function(distance)
 end
 
 -- Returns the temperature at pos due to fire, body warmth, etc.
+-- Also geothermal heat, I just realized
 -- Unlike winter.raw_outside_temperature, which handles the weather
 local heat_search_size = 5
 winter.specific_temperature = function(pos)
@@ -32,5 +33,7 @@ winter.specific_temperature = function(pos)
 			total_node_heat = total_node_heat + heat_dropoff_curve(nodepos:distance(pos)) * nodeheat
 		end
 	end
-	return total_node_heat
+	-- yes technically we already accounted for the altitude in the general weather intensity but..... idk
+	local geothermal_heat = -pos.y / 10
+	return total_node_heat + geothermal_heat
 end
