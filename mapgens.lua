@@ -6,7 +6,6 @@ minetest.register_on_mods_loaded(function()
 	end
 	core.clear_registered_biomes()
 	for _, biome in pairs(old_biomes) do
-		print(biome.name, string.find(biome.name, "snow") or string.find(biome.name, "ice"))
 		if string.find(biome.name, "snow") or string.find(biome.name, "ice") then
 			core.register_biome(biome)
 		end
