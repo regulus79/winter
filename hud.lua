@@ -51,7 +51,7 @@ end)
 
 local infotext_string = function(player)
 	local current_body_temp = player:get_meta():get_float("body_temperature")
-	local feels_like_temp = winter.feels_like_temp(player:get_pos() + vector.new(0, 1.1, 0))
+	local feels_like_temp = winter.get_cached(player, "feels_like_temp")
 	local wetness = player:get_meta():get_float("wetness")
 	local output = ""
 	if current_body_temp < winter.deadly_body_temperature then

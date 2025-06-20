@@ -18,7 +18,7 @@ end)
 
 winter.register_timer("drying_update", 2, function(dtime)
 	for _, player in pairs(minetest.get_connected_players()) do
-		local temp = winter.feels_like_temp(player:get_pos() + vector.new(0, 1.1, 0))
+		local temp = winter.get_cached(player, "feels_like_temp")
 		-- If temp is greater than deadly body temp, speed up drying (kinda arbitrary but still)
 		local heat_multiplier = (temp > winter.deadly_body_temperature) and winter.heat_drying_multiplier * (temp/winter.deadly_body_temperature) or 1
 		local meta = player:get_meta()

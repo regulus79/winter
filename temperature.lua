@@ -25,8 +25,8 @@ winter.metabolism = function(player)
 	end
 	local metabolism_rate = player:get_meta():get_float("metabolism_rate")
 	local body_temp = player:get_meta():get_float("body_temperature")
-	--minetest.debug("Metabolism: temp difference: ", winter.target_body_temperature - body_temp)
-	return math.sign(winter.target_body_temperature - body_temp) * metabolism_rate
+	-- TODO maybe in the future add sweating to cool yourself? Currently you can't overheat
+	return metabolism_rate
 end
 
 winter.heat_loss_rate = function(player)
@@ -38,7 +38,7 @@ end
 -- Returns the rate of change in body temp
 -- Heat loss rate depends on the clothing being worn
 winter.change_in_body_temp = function(player)
-	local external_temp = winter.feels_like_temp(player:get_pos() + vector.new(0,1.1,0))
+	local external_temp = winter.get_cached(player, "feels_like_temp")
 	local current_body_temp = player:get_meta():get_float("body_temperature")
 	local heat_loss_rate = winter.heat_loss_rate(player)
 	local metabolism = winter.metabolism(player)
@@ -126,14 +126,15 @@ local wind_chill_weight = 1
 local shelter_weight = 1
 
 -- Combine the total temperature (weather + heat sources) with the wind chill and shelter ratio
-winter.feels_like_temp = function(pos)
-	local shelter, wind_shelter = winter.sheltered(pos)
+winter.feels_like_temp = function(player)
+	local temp_shelter = winter.get_cached(player, "temp_sheltered")
+	local wind_shelter = winter.get_cached(player, "wind_sheltered")
 	-- Total heat, from weather and nodes/players
-	local actual_temp = winter.total_temperature(pos)
+	local actual_temp = winter.get_cached(player, "total_temperature")
 	-- Heat only given off by players, fire, torches, etc
-	local local_temperature = winter.specific_temperature(pos)
+	local local_temperature = winter.get_cached(player, "specific_temperature")
 	-- Lerp between actual temp and heat source temp based on shelter ratio
-	local outside_chill = actual_temp + shelter * (local_temperature - actual_temp) * shelter_weight
-	local wind_chill = -(1 - wind_shelter) * winter.wind(pos):length() * wind_chill_weight
+	local outside_chill = actual_temp + temp_shelter * (local_temperature - actual_temp) * shelter_weight
+	local wind_chill = -(1 - wind_shelter) * winter.wind(player:get_pos()):length() * wind_chill_weight
 	return outside_chill + wind_chill
 end
