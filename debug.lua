@@ -58,18 +58,13 @@ core.register_on_joinplayer(function(player)
 	})
 end)
 
-local debug_update_timer = 0
-local debug_update_interval = 0.25
-core.register_globalstep(function(dtime)
-	debug_update_timer = debug_update_timer + dtime
-	if debug_update_timer > debug_update_interval then
-		debug_update_timer = 0
-		for _, player in pairs(core.get_connected_players()) do
-			if player_debug_enabled[player:get_player_name()] then
-				player:hud_change(player_debug_ids[player:get_player_name()], "text", debug_string(player))
-			else
-				player:hud_change(player_debug_ids[player:get_player_name()], "text", "")
-			end
+
+winter.register_timer("debug_info", 0.25, function(dtime)
+	for _, player in pairs(core.get_connected_players()) do
+		if player_debug_enabled[player:get_player_name()] then
+			player:hud_change(player_debug_ids[player:get_player_name()], "text", debug_string(player))
+		else
+			player:hud_change(player_debug_ids[player:get_player_name()], "text", "")
 		end
 	end
 end)

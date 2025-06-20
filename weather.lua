@@ -131,23 +131,11 @@ core.register_on_joinplayer(function(player)
 	update_snow_particles(player)
 end)
 
-local particle_update_timer = 0
-local particle_update_period = 1
-local weather_update_timer = 0
-local weather_update_period = 1
-core.register_globalstep(function(dtime)
-	particle_update_timer = particle_update_timer + dtime
-	weather_update_timer = weather_update_timer + dtime
-	if particle_update_timer > particle_update_period then
-		particle_update_timer = 0
-		for _, player in pairs(core.get_connected_players()) do
-			update_snow_particles(player)
-		end
-	end
-	if weather_update_timer > weather_update_period then
-		weather_update_timer = 0
-		for _, player in pairs(core.get_connected_players()) do
-			update_sky(player)
-		end
+
+
+winter.register_timer("sky_and_particle_update", 1, function(dtime)
+	for _, player in pairs(core.get_connected_players()) do
+		update_snow_particles(player)
+		update_sky(player)
 	end
 end)

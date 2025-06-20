@@ -92,60 +92,48 @@ local temp_to_stat = function(temp)
 end
 
 
-local temperature_update_timer = 0
-local temperature_update_interval = 1
-local vignette_update_timer = 0
-local vignette_update_interval = 0.1
-local other_gui_update_timer = 0
-local other_gui_update_interval = 0.5
-core.register_globalstep(function(dtime)
-	temperature_update_timer = temperature_update_timer + dtime
-	if temperature_update_timer > temperature_update_interval then
-		temperature_update_timer = 0
-		for _, player in pairs(core.get_connected_players()) do
-			local body_temp_change_rate = winter.change_in_body_temp(player)
-			-- Disable overheating with math.min
-			local new_body_temp = math.min(player:get_meta():get_float("body_temperature") + body_temp_change_rate * temperature_update_interval, winter.target_body_temperature)
-			winter.set_body_temp(player, new_body_temp, temperature_update_interval)
 
-			-- Update statbar
-			local new_cold_stat = temp_to_stat(new_body_temp)
-			player:get_meta():set_float("cold_stat", new_cold_stat)
-			player:hud_change(player_statbar_ids[player:get_player_name()], "number", new_cold_stat)
+winter.register_timer("temperature_update", 1, function(dtime)
+	for _, player in pairs(core.get_connected_players()) do
+		local body_temp_change_rate = winter.change_in_body_temp(player)
+		-- Disable overheating with math.min
+		local new_body_temp = math.min(player:get_meta():get_float("body_temperature") + body_temp_change_rate * dtime, winter.target_body_temperature)
+		winter.set_body_temp(player, new_body_temp, dtime)
 
-			-- Update vingette targets
-			player_vingette_targets[player:get_player_name()] = math.min(0.5, math.max(-0.5, body_temp_change_rate))
+		-- Update statbar
+		local new_cold_stat = temp_to_stat(new_body_temp)
+		player:get_meta():set_float("cold_stat", new_cold_stat)
+		player:hud_change(player_statbar_ids[player:get_player_name()], "number", new_cold_stat)
+
+		-- Update vingette targets
+		player_vingette_targets[player:get_player_name()] = math.min(0.5, math.max(-0.5, body_temp_change_rate))
+	end
+end)
+
+-- Update the vignette opacities, kind of interpolating them so that we don't have to do so many calculations
+winter.register_timer("vignette_update", 0.1, function(dtime)
+	for _, player in pairs(core.get_connected_players()) do
+		local current = player_vingette_current[player:get_player_name()]
+		local target = player_vingette_targets[player:get_player_name()]
+		local opacity = math.min(255, math.abs(255 * (current) / 0.5))
+		if current < 0 then
+			player:hud_change(player_vingette_ids[player:get_player_name()], "text", "winter_cold_vignette.png^[opacity:" .. tostring(opacity))
+		else
+			player:hud_change(player_vingette_ids[player:get_player_name()], "text", "winter_warm_vignette.png^[opacity:" .. tostring(opacity))
+		end
+		local update_amount = math.sign(target - current) * dtime * 0.25
+		if math.abs(update_amount) > math.abs(target - current) then
+			player_vingette_current[player:get_player_name()] = target
+		else
+			player_vingette_current[player:get_player_name()] = current + update_amount
 		end
 	end
-	-- Update the vignette opacities, kind of interpolating them so that we don't have to do so many calculations
-	vignette_update_timer = vignette_update_timer + dtime
-	if vignette_update_timer > vignette_update_interval then
-		vignette_update_timer = 0
-		for _, player in pairs(core.get_connected_players()) do
-			local current = player_vingette_current[player:get_player_name()]
-			local target = player_vingette_targets[player:get_player_name()]
-			local opacity = math.min(255, math.abs(255 * (current) / 0.5))
-			if current < 0 then
-				player:hud_change(player_vingette_ids[player:get_player_name()], "text", "winter_cold_vignette.png^[opacity:" .. tostring(opacity))
-			else
-				player:hud_change(player_vingette_ids[player:get_player_name()], "text", "winter_warm_vignette.png^[opacity:" .. tostring(opacity))
-			end
-			local update_amount = math.sign(target - current) * vignette_update_interval * 0.25
-			if math.abs(update_amount) > math.abs(target - current) then
-				player_vingette_current[player:get_player_name()] = target
-			else
-				player_vingette_current[player:get_player_name()] = current + update_amount
-			end
-		end
-	end
-	-- Update info text above hotbar
-	other_gui_update_timer = other_gui_update_timer + dtime
-	if other_gui_update_timer > other_gui_update_interval then
-		other_gui_update_timer = 0
-		for _, player in pairs(core.get_connected_players()) do
-			player:hud_change(player_infotext_ids[player:get_player_name()], "text", infotext_string(player))
-			player:hud_change(player_warning_ids[player:get_player_name()], "text", warning_text(player))
-		end
+end)
+
+winter.register_timer("other_gui_update", 0.5, function(dtime)
+	for _, player in pairs(core.get_connected_players()) do
+		player:hud_change(player_infotext_ids[player:get_player_name()], "text", infotext_string(player))
+		player:hud_change(player_warning_ids[player:get_player_name()], "text", warning_text(player))
 	end
 end)
 
