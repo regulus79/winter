@@ -10,6 +10,7 @@ dofile(core.get_modpath("winter") .. "/heat.lua")
 dofile(core.get_modpath("winter") .. "/wetness.lua")
 dofile(core.get_modpath("winter") .. "/temperature.lua")
 dofile(core.get_modpath("winter") .. "/hud.lua")
+dofile(core.get_modpath("winter") .. "/movement.lua")
 dofile(core.get_modpath("winter") .. "/debug.lua")
 
 

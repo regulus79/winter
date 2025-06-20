@@ -1,6 +1,7 @@
 
 local player_statbar_ids = {}
 local player_infotext_ids = {}
+local player_warning_ids = {}
 local player_vingette_ids = {}
 local player_vingette_current = {}
 local player_vingette_targets = {}
@@ -25,6 +26,16 @@ core.register_on_joinplayer(function(player)
 		text = "",
 		z_index = 100,
 	})
+	player_warning_ids[player:get_player_name()] = player:hud_add({
+		type = "text",
+		position = {x = 0.5, y = 0},
+		offset = {x = 0, y = 20},
+		size = {x = 3, y = 0},
+		alignment = {x = 0, y = 1},
+		number = 0xAAAAAA,
+		text = "",
+		z_index = 100,
+	})
 	player_vingette_targets[player:get_player_name()] = 0
 	player_vingette_current[player:get_player_name()] = 0
 	player_vingette_ids[player:get_player_name()] = player:hud_add({
@@ -40,7 +51,7 @@ end)
 
 local infotext_string = function(player)
 	local current_body_temp = player:get_meta():get_float("body_temperature")
-	local feels_like_temp = winter.feels_like_temp(player:get_pos() + vector.new(0,1,0))
+	local feels_like_temp = winter.feels_like_temp(player:get_pos() + vector.new(0, 1.1, 0))
 	local wetness = player:get_meta():get_float("wetness")
 	local output = ""
 	if current_body_temp < winter.deadly_body_temperature then
@@ -66,6 +77,15 @@ local infotext_string = function(player)
 end
 
 
+local warning_text = function(player)
+	local output = ""
+	if winter.is_in_winter_storm(player) then
+		output = output .. "WINTER STORM"
+	end
+	return output
+end
+
+
 local temp_to_stat = function(temp)
 	local difference_from_body_temp = winter.target_body_temperature - temp
 	return math.round(math.max(0, max_cold * difference_from_body_temp / (winter.target_body_temperature - winter.deadly_body_temperature)))
@@ -76,8 +96,8 @@ local temperature_update_timer = 0
 local temperature_update_interval = 1
 local vignette_update_timer = 0
 local vignette_update_interval = 0.1
-local infotext_update_timer = 0
-local infotext_update_interval = 0.5
+local other_gui_update_timer = 0
+local other_gui_update_interval = 0.5
 core.register_globalstep(function(dtime)
 	temperature_update_timer = temperature_update_timer + dtime
 	if temperature_update_timer > temperature_update_interval then
@@ -119,11 +139,12 @@ core.register_globalstep(function(dtime)
 		end
 	end
 	-- Update info text above hotbar
-	infotext_update_timer = infotext_update_timer + dtime
-	if infotext_update_timer > infotext_update_interval then
-		infotext_update_timer = 0
+	other_gui_update_timer = other_gui_update_timer + dtime
+	if other_gui_update_timer > other_gui_update_interval then
+		other_gui_update_timer = 0
 		for _, player in pairs(core.get_connected_players()) do
 			player:hud_change(player_infotext_ids[player:get_player_name()], "text", infotext_string(player))
+			player:hud_change(player_warning_ids[player:get_player_name()], "text", warning_text(player))
 		end
 	end
 end)

@@ -1,7 +1,7 @@
 
 local weather_noise;
 -- You can only init noise when the mapgen env is ready, but for some reason that wasn't always the case with on_mods_loaded
--- So here I am checking every frame to see if it's loaded yet, and if so, generate the weather noise. This isn't ideal.
+-- So here I check every frame to see if it's loaded yet, and if so, generate the weather noise. Probably not ideal
 core.register_globalstep(function()
 	if not weather_noise then
 		weather_noise = core.get_value_noise({
@@ -26,23 +26,29 @@ local random_intensity = function(period, seedish)
 end
 
 winter.general_weather_intensity = function(pos)
-	return random_intensity(30, 0)^2 + pos.y / 50
+	return random_intensity(300, 0)^2 + pos.y / 50
 end
 
 winter.wind = function(pos)
 	return 10 * vector.new(math.cos(random_intensity(600, 2)), 0, math.cos(random_intensity(600, 2))) * winter.general_weather_intensity(pos)
 end
 winter.fog = function(pos)
-	return math.max(10, 55 - 30 * winter.general_weather_intensity(pos))
+	return math.max(10, 80 - 60 * winter.general_weather_intensity(pos))
 end
 winter.snowfall_density = function(pos)
 	return math.max(0.1, 3 * winter.general_weather_intensity(pos))
 end
 
+
+winter.is_in_winter_storm = function(player)
+	return winter.general_weather_intensity(player:get_pos()) > 1
+end
+
 -- Returns the current temperature due to weather variations/altitude at pos
 -- Does not take into account the shelter, wind, or fire
 winter.raw_outside_temperature = function(pos)
-	local base_temp = -20 * winter.general_weather_intensity(pos)
+	local base_temp = 0 - 20 * winter.general_weather_intensity(pos)
+	-- yes technically we already accounted for the altitude in the normal weather intensity but..... still idk
 	local altitude_temp = -pos.y / 10
 	return base_temp + altitude_temp
 end

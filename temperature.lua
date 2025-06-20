@@ -38,7 +38,7 @@ end
 -- Returns the rate of change in body temp
 -- Heat loss rate depends on the clothing being worn
 winter.change_in_body_temp = function(player)
-	local external_temp = winter.feels_like_temp(player:get_pos() + vector.new(0,1,0))
+	local external_temp = winter.feels_like_temp(player:get_pos() + vector.new(0,1.1,0))
 	local current_body_temp = player:get_meta():get_float("body_temperature")
 	local heat_loss_rate = winter.heat_loss_rate(player)
 	local metabolism = winter.metabolism(player)
@@ -52,7 +52,6 @@ winter.set_body_temp = function(player, temp, deltatime)
 	player:get_meta():set_float("body_temperature", temp)
 	if temp < winter.deadly_body_temperature then
 		local hp_loss = winter.cold_hp_loss_rate_per_degree * (winter.deadly_body_temperature - temp) * deltatime
-		minetest.debug(hp_loss)
 		if hp_loss < 1 then
 			hp_loss = (math.random() < hp_loss) and 1 or 0
 		end
@@ -64,7 +63,7 @@ end
 -- Shelter
 --
 
-local ray_length = 3
+local ray_length = 5
 local ray_directions = {
 	vector.new(1,0,0):normalize(),
 	vector.new(1,0,1):normalize(),
@@ -90,6 +89,7 @@ local ray_pointabilities = {
 }
 
 -- Returns two numbers from 0 to 1 indicating how sheltered the position is from the outside and the wind
+-- 0 means completely unsheltered, 1 is perfectly sheltered
 winter.sheltered = function(pos)
 	local current_wind_dir = winter.wind(pos):normalize()
 	local temp_sheltered_score = 0
