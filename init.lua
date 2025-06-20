@@ -14,6 +14,7 @@ dofile(core.get_modpath("winter") .. "/playercache.lua")
 dofile(core.get_modpath("winter") .. "/hud.lua")
 dofile(core.get_modpath("winter") .. "/movement.lua")
 dofile(core.get_modpath("winter") .. "/debug.lua")
+dofile(core.get_modpath("winter") .. "/hunger.lua")
 
 
 core.register_on_newplayer(function(player)

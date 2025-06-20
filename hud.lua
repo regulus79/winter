@@ -8,12 +8,18 @@ local player_vingette_targets = {}
 
 local max_cold = 16
 
+-- This may be redefined in hunger.lua depending on what other statbar mods are enabled
+winter.cold_statbar_offset = {x = 24, y = -89}
+-- Offset when breath bubbles statbar is showing
+winter.cold_statbar_breath_offset = {x = 24, y = -112}
+
 core.register_on_joinplayer(function(player)
 	player_statbar_ids[player:get_player_name()] = player:hud_add({
 		type = "statbar",
 		position = {x = 0.5, y = 1},
-		offset = {x = -265 + 265 + 24, y = -89},
+		offset = winter.cold_statbar_offset,
 		size = {x = 24, y = 24},
+		direction = 0,
 		text = "winter_stat_snowflake.png",
 		number = player:get_meta():get_float("cold_stat"),
 	})
@@ -93,17 +99,20 @@ end
 
 
 
-winter.register_timer("temperature_update", 1, function(dtime)
+winter.register_timer("temperature_update", 0, function(dtime)
 	for _, player in pairs(core.get_connected_players()) do
 		local body_temp_change_rate = winter.change_in_body_temp(player)
+		-- TODO move this out of gui.lua
 		-- Disable overheating with math.min
 		local new_body_temp = math.min(player:get_meta():get_float("body_temperature") + body_temp_change_rate * dtime, winter.target_body_temperature)
 		winter.set_body_temp(player, new_body_temp, dtime)
+		winter.apply_hunger(player, winter.metabolism(player) * winter.hunger_per_metabolism * dtime)
 
 		-- Update statbar
 		local new_cold_stat = temp_to_stat(new_body_temp)
 		player:get_meta():set_float("cold_stat", new_cold_stat)
 		player:hud_change(player_statbar_ids[player:get_player_name()], "number", new_cold_stat)
+		player:hud_change(player_statbar_ids[player:get_player_name()], "offset", (player:get_breath() < player:get_properties().breath_max) and winter.cold_statbar_breath_offset or winter.cold_statbar_offset)
 
 		-- Update vingette targets
 		player_vingette_targets[player:get_player_name()] = math.min(0.5, math.max(-0.5, body_temp_change_rate))
