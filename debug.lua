@@ -10,7 +10,7 @@ local player_debug_enabled = {}
 local debug_string = function(player)
 	local pos = player:get_pos()
 	local real_outside_temp = winter.raw_outside_temperature(pos)
-	local local_temperature = winter.get_cached(player, "specific_temperature")
+	local heat_source_temp = winter.get_cached(player, "heat_source_temp")
 	local feels_like_temp = winter.get_cached(player, "feels_like_temp")
 	local current_body_temp = player:get_meta():get_float("body_temperature")
 	local temp_difference = feels_like_temp - current_body_temp
@@ -32,7 +32,7 @@ local debug_string = function(player)
 		"Weather Intensity:\n   " .. tostring(winter.general_weather_intensity(pos)),
 		"Wind Speed:\n   " .. tostring(winter.wind(pos):length()),
 		"External Temp:\n   " .. tostring(real_outside_temp),
-		"Local Temp:\n   " .. tostring(local_temperature),
+		"Heat Source Temp:\n   " .. tostring(heat_source_temp),
 		"Temp Sheltered:\n   " .. tostring(winter.get_cached(player, "temp_sheltered")),
 		"Wind Sheltered:\n   " .. tostring(winter.get_cached(player, "wind_sheltered")),
 		"Feels like temp:\n   " .. tostring(feels_like_temp),

@@ -11,8 +11,7 @@ winter.register_timer("cache", 1, function(dtime)
 		if not winter.cache[playername] then winter.cache[playername] = {} end
 
 		winter.cache[playername].temp_sheltered, winter.cache[playername].wind_sheltered = winter.sheltered(pos)
-		winter.cache[playername].total_temperature = winter.total_temperature(pos)
-		winter.cache[playername].specific_temperature = winter.specific_temperature(pos)
+		winter.cache[playername].heat_source_temp = winter.heat_source_temp(pos, winter.cache[playername].temp_sheltered)
 		winter.cache[playername].feels_like_temp = winter.feels_like_temp(player)
 	end
 end)

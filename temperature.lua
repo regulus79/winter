@@ -111,28 +111,22 @@ end
 -- "Feels Like" Temperature
 --
 
--- Returns the total temperature from both the weather and heat sources (fire, torches, etc)
--- Does not take into account wind or shelter
-winter.total_temperature = function(pos)
-	local raw_outside_temp = winter.raw_outside_temperature(pos)
-	local local_temperature = winter.specific_temperature(pos)
-	return raw_outside_temp + local_temperature
-end
-
-
 local wind_chill_weight = 1
 local shelter_weight = 1
 
 -- Combine the total temperature (weather + heat sources) with the wind chill and shelter ratio
 winter.feels_like_temp = function(player)
+	local pos = player:get_pos()
 	local temp_shelter = winter.get_cached(player, "temp_sheltered")
 	local wind_shelter = winter.get_cached(player, "wind_sheltered")
 	-- Total heat, from weather and nodes/players
-	local actual_temp = winter.get_cached(player, "total_temperature")
-	-- Heat only given off by players, fire, torches, etc
-	local local_temperature = winter.get_cached(player, "specific_temperature")
-	-- Lerp between actual temp and heat source temp based on shelter ratio
-	local outside_chill = actual_temp + temp_shelter * (local_temperature - actual_temp) * shelter_weight
+	local base_temp_outdoors = winter.raw_outside_temperature(pos)
+	-- Get heat given off by players, fire, torches, etc, assuming there is/isn't shelter
+	-- Without shelter, heat spread off and is swept away quickly, whereas inside a room, heat stays confined
+	local heat_source_temp = winter.get_cached(player, "heat_source_temp")
+
+	local outside_chill = base_temp_outdoors * (1 - temp_shelter) + heat_source_temp
+	-- And add some wind chill
 	local wind_chill = -(1 - wind_shelter) * winter.wind(player:get_pos()):length() * wind_chill_weight
 	return outside_chill + wind_chill
 end
