@@ -19,14 +19,11 @@ winter.wetness_heat_loss_rate = 0.1
 
 
 winter.metabolism = function(player)
-	local food_supply = 1 -- TODO add hunger
-	if food_supply <= 0 then
-		return 0
-	end
 	local metabolism_rate = player:get_meta():get_float("metabolism_rate")
 	local body_temp = player:get_meta():get_float("body_temperature")
 	local temp_difference = winter.target_body_temperature - body_temp
-	-- Using min/max clamp to ramp down metabolism as you approach normal temp
+	-- Using min/max clamp to ramp down metabolism as you approach normal temp, otherwise the predicted body temp goes crazy.
+	-- But then again the user doesn't see that so maybe it's fine idk
 	return math.max(-metabolism_rate, math.min(metabolism_rate, temp_difference * metabolism_rate))
 end
 

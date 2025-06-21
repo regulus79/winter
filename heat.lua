@@ -3,7 +3,8 @@
 winter.indoor_heat_source_dropoff = 30
 -- If you can't directly see the heat source, decrease it's range
 winter.indirect_heat_source_dropoff_multiplier = 0.3
-
+-- Geothermal heat degrees per meter. The deeper you go, the warmer it gets.
+winter.geothermal_constant = 0.05
 
 winter.heat_nodes = {
 	["fire:permanent_flame"] = 70,
@@ -48,6 +49,6 @@ winter.heat_source_temp = function(pos, shelter)
 		end
 	end
 	-- yes technically we already accounted for the altitude in the general weather intensity but..... idk
-	local geothermal_heat = -pos.y / 10
+	local geothermal_heat = -pos.y * winter.geothermal_constant
 	return total_node_heat + geothermal_heat
 end
