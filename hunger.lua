@@ -5,7 +5,11 @@
 -- so that as your body does its metabolism and produces heat, it will use hunger
 --
 
-winter.hunger_per_metabolism = -0.25
+-- Assuming 12000 J per hunger point.
+-- You could say like, you have 6000 Calories of food in your system, = 21504000 ish J
+-- Divided between 20 hunger points is like 1500000 J/point
+-- But that's for the real world, but since luanti is a faster pace, you can divide that by like 100
+winter.hunger_per_metabolism = -1 / 15000
 
 
 winter.apply_hunger = function() end

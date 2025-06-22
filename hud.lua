@@ -101,7 +101,7 @@ end
 
 winter.register_timer("temperature_update", 0, function(dtime)
 	for _, player in pairs(core.get_connected_players()) do
-		local body_temp_change_rate = winter.change_in_body_temp(player)
+		local body_temp_change_rate = winter.body_temp_change_rate(player)
 		-- TODO move this out of gui.lua
 		-- Disable overheating with math.min
 		local new_body_temp = player:get_meta():get_float("body_temperature")

@@ -23,7 +23,7 @@ local heat_dropoff_curve = function(distance, dropoff)
 end
 
 -- Returns the temperature at pos due to fire, body warmth, etc.
--- Also geothermal heat, I just realized
+-- Also geothermal heat
 -- Unlike winter.raw_outside_temperature, which handles the weather
 -- The dropoff aprameter controls the steepness of the heat dropoff curve. Indoors, heat tends to accumulate and spread out, whereas outdoors it is easily swept away unless you are close to the source.
 local heat_search_size = 10

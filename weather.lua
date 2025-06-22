@@ -26,7 +26,7 @@ local random_intensity = function(period, seedish)
 end
 
 winter.general_weather_intensity = function(pos)
-	return random_intensity(300, 0)^2 + pos.y / 50
+	return math.max(0, random_intensity(300, 0)^2 + pos.y / 50)
 end
 
 winter.wind = function(pos)

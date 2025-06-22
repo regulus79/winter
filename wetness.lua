@@ -1,7 +1,7 @@
 
 winter.wetting_rate = 0.25
-winter.drying_rate = 0.01
-winter.heat_drying_multiplier = 2
+winter.drying_rate = 0.002
+winter.heat_drying_multiplier = 4
 
 winter.max_wetness = 1
 

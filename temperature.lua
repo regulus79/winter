@@ -5,46 +5,11 @@
 --
 
 winter.target_body_temperature = 37
-winter.decent_body_temperature = 30
-winter.chilly_body_temperature = 20
-winter.deadly_body_temperature = 10
--- TODO: change to function to allow different clothing to affect cold tolerance
-winter.default_body_heat_loss_rate = 0.005
-winter.default_metabolism_rate = 0.1
+winter.decent_body_temperature = 35
+winter.chilly_body_temperature = 33
+winter.deadly_body_temperature = 30
 
 winter.cold_hp_loss_rate_per_degree = 0.1
-
-winter.wetness_heat_loss_rate = 0.1
-
-
-
-winter.metabolism = function(player)
-	local metabolism_rate = player:get_meta():get_float("metabolism_rate")
-	local body_temp = player:get_meta():get_float("body_temperature")
-	local temp_difference = winter.target_body_temperature - body_temp
-	-- Using min/max clamp to ramp down metabolism as you approach normal temp, otherwise the predicted body temp goes crazy.
-	-- But then again the user doesn't see that so maybe it's fine idk
-	return math.max(-metabolism_rate, math.min(metabolism_rate, temp_difference * metabolism_rate))
-end
-
-winter.heat_loss_rate = function(player)
-	local heat_loss_rate = player:get_meta():get_float("body_heat_loss_rate")
-	local wetness = player:get_meta():get_float("wetness")
-	return heat_loss_rate + wetness * winter.wetness_heat_loss_rate
-end
-
--- Returns the rate of change in body temp
--- Heat loss rate depends on the clothing being worn
-winter.change_in_body_temp = function(player)
-	local external_temp = winter.get_cached(player, "feels_like_temp")
-	local current_body_temp = player:get_meta():get_float("body_temperature")
-	local heat_loss_rate = winter.heat_loss_rate(player)
-	local metabolism = winter.metabolism(player)
-	local temp_difference = external_temp - current_body_temp
-	local temp_change = heat_loss_rate * temp_difference + metabolism
-	return temp_change
-end
-
 
 winter.set_body_temp = function(player, temp, deltatime)
 	player:get_meta():set_float("body_temperature", temp)
@@ -55,6 +20,104 @@ winter.set_body_temp = function(player, temp, deltatime)
 		end
 		player:set_hp(player:get_hp() - hp_loss)
 	end
+end
+
+
+--
+-- Heat Transfer
+--
+
+-- I basically copied the specific heat of water, since people are like water, right?
+-- Dividing for testing to make the process faster
+winter.body_specific_heat = 4184 / 1000
+-- Just a guess-- it should be round water maybe, which is 0.6
+-- Actually affter testing it seems it needs to be way higher
+winter.default_body_thermal_conductivity = 2.5
+-- TODO make this customizable. Or not? idk
+winter.default_body_mass = 60
+-- Random number I found online
+winter.body_surface_area = 1.7
+
+-- TODO make this meaningful, like in terms of calories or idk
+-- If a normal human uses 2000 kCals per day = 8368000 J per 86400 seconds = 96.9 J/s
+-- That's probably too high though, since not all the energy becomes heat (right?)
+winter.default_metabolism_rate = 96.9
+
+-- This is wrong, the reason water cools you is due to evaporation, not only conduction.
+-- However, it's probably fine to model it as an extreme increase in conductivity
+winter.wetness_thermal_conductivity = 10
+
+
+-- Returns the rate of change in body temp
+winter.body_temp_change_rate = function(player)
+	return winter.body_heat_flow_rate(player) / winter.body_specific_heat / winter.default_body_mass
+end
+
+
+-- Returns the amount of heat flowing into the body, along with heat from metabolism
+winter.body_heat_flow_rate = function(player)
+	local external_temp = winter.get_cached(player, "feels_like_temp")
+	local body_temp = player:get_meta():get_float("body_temperature")
+
+	local temp_difference = external_temp - body_temp
+	local thermal_conductivity = winter.thermal_conductivity(player)
+	local surface_area = winter.body_surface_area
+	local metabolism = winter.metabolism(player)
+
+	return temp_difference * thermal_conductivity * surface_area + metabolism
+end
+
+winter.thermal_conductivity = function(player)
+	-- Did you know you can use Ohm's law for heat transfer? Neither did I, but it's super cool!
+	-- Basically instead of Voltage = Current * Resistance, it's Temperature Difference = Heat Flow * 1/Conductivity (I think)
+	-- Now we can use all those fancy equations for series/parallel circuits, but for heat!
+
+	-- Clothing on differen limbs is like a parallel circuit
+	-- Depending on which limbs you have covered, there are different paths for the heat to take
+	-- 1/R_total = 1/R1 + 1/R2 + ...
+	-- => Conductivity_total = Conductivity1 + Conductivity2 +  ...
+
+	-- However, layers of clothing (and treating the body/skin as a layer), it's also a series circuit
+	-- R_total = R1 + R2 ...
+	-- => 1/Conductivity_total = 1/Conductivity1 + 1/Conductivity2 +  ...
+	-- => Conductivity_total = 1/(1/Conductivity1 + 1/Conductivity2 +  ...)
+
+	-- We can also treat wetness as a parallel circuit, as if the water provides an alternative way for heat to escape (maybe that's wrong idk)
+	local wetness = player:get_meta():get_float("wetness")
+	local wetness_conductivity = wetness * winter.wetness_thermal_conductivity
+
+	-- In essense, the overall circuit looks like this:
+	-- -- Body/Skin in series with each limb (and water)
+	-- -- Each limb (Head, Torso, Legs, Feet) in series with the different layers of clothing on it
+	-- -- Each limb/water can be thought of as all in parallel with each other
+	
+	-- So the equation is like:
+	-- 1 / R_total = 1 / (R_Body + R_Head) + 1 / (R_Body + R_Torso) + 1 / (R_Body + R_Legs) + + 1 / (R_Body + R_Feet) + + 1 / (R_Body + R_Water)
+	-- => Conductivity_total = 1/(1/Body + 1/Head) + 1/(1/Body + 1/Torso) + 1/(1/Body + 1/Legs) + ...
+	-- Check out clothing.lua for the exact implementation
+
+	local clothing = winter.get_clothing(player)
+
+	-- The function takes into account skin as the first layer of clothing
+	-- And we are weighting these to give things like the torso more importance
+	local clothing_conductivity = (
+		winter.get_clothing_group_conductivity(clothing, "armor_head") * winter.head_conductivity_weight
+		+ winter.get_clothing_group_conductivity(clothing, "armor_torso") * winter.torso_conductivity_weight
+		+ winter.get_clothing_group_conductivity(clothing, "armor_legs") * winter.legs_conductivity_weight
+		+ winter.get_clothing_group_conductivity(clothing, "armor_feet") * winter.feet_conductivity_weight
+	)
+
+	return clothing_conductivity + wetness_conductivity
+end
+
+
+winter.metabolism = function(player)
+	local metabolism_rate = winter.default_metabolism_rate
+	--return metabolism_rate
+	local body_temp = player:get_meta():get_float("body_temperature")
+	local temp_difference = winter.target_body_temperature - body_temp
+	-- Offset by a bit to just make sure you're still makeing energy even if you're like 36.99 degrees
+	return math.max(-metabolism_rate, math.min(metabolism_rate, metabolism_rate * (temp_difference + 0.3)))
 end
 
 --
