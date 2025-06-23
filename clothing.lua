@@ -43,21 +43,21 @@ core.register_on_mods_loaded(function()
 	armor:register_armor(":winter:hat", {
 		description = "Hat",
 		inventory_image = "default_dirt.png",
-		groups = {armor_head = 1, armor_use = 2000, clothing = 1, thermal_conductivity = 2}
+		groups = {armor_head = 1, armor_use = 2000, clothing = 1, thermal_conductivity = 2.5}
 	})
 	armor:register_armor(":winter:coat", {
 		description = "Coat",
 		inventory_image = "default_snow.png",
-		groups = {armor_torso = 1, armor_use = 2000, clothing = 1, thermal_conductivity = 2}
+		groups = {armor_torso = 1, armor_use = 2000, clothing = 1, thermal_conductivity = 2.5}
 	})
 	armor:register_armor(":winter:pants", {
 		description = "Pants",
 		inventory_image = "default_stone.png",
-		groups = {armor_legs = 1, armor_use = 2000, clothing = 1, thermal_conductivity = 2}
+		groups = {armor_legs = 1, armor_use = 2000, clothing = 1, thermal_conductivity = 2.5}
 	})
 	armor:register_armor(":winter:boots", {
 		description = "Boots",
 		inventory_image = "default_cobble.png",
-		groups = {armor_feet = 1, armor_use = 2000, clothing = 1, thermal_conductivity = 2}
+		groups = {armor_feet = 1, armor_use = 2000, clothing = 1, thermal_conductivity = 2.5}
 	})
 end)

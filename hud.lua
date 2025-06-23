@@ -2,6 +2,8 @@
 local player_statbar_ids = {}
 local player_infotext_ids = {}
 local player_warning_ids = {}
+local player_wind_icon_ids = {}
+local player_wet_icon_ids = {}
 local player_vingette_ids = {}
 local player_vingette_current = {}
 local player_vingette_targets = {}
@@ -41,6 +43,24 @@ core.register_on_joinplayer(function(player)
 		number = 0xAAAAAA,
 		text = "",
 		z_index = 100,
+	})
+	player_wind_icon_ids[player:get_player_name()] = player:hud_add({
+		type = "image",
+		position = {x = 0, y = 1},
+		offset = {x = 50, y = -50},
+		scale = {x = 1, y = 1},
+		alignment = {x = 0, y = 0},
+		text = "",
+		z_index = 200,
+	})
+	player_wet_icon_ids[player:get_player_name()] = player:hud_add({
+		type = "image",
+		position = {x = 0, y = 1},
+		offset = {x = 120, y = -50},
+		scale = {x = 1, y = 1},
+		alignment = {x = 0, y = 0},
+		text = "",
+		z_index = 200,
 	})
 	player_vingette_targets[player:get_player_name()] = 0
 	player_vingette_current[player:get_player_name()] = 0
@@ -146,6 +166,21 @@ winter.register_timer("other_gui_update", 0.5, function(dtime)
 	for _, player in pairs(core.get_connected_players()) do
 		player:hud_change(player_infotext_ids[player:get_player_name()], "text", infotext_string(player))
 		player:hud_change(player_warning_ids[player:get_player_name()], "text", warning_text(player))
+
+		local localwind = winter.wind(player:get_pos()):length() * (1 - winter.get_cached(player, "wind_sheltered"))
+		if localwind > 15 then
+			player:hud_change(player_wind_icon_ids[player:get_player_name()], "text", "winter_icon_wind2.png")
+		elseif localwind > 8 then
+			player:hud_change(player_wind_icon_ids[player:get_player_name()], "text", "winter_icon_wind1.png")
+		else
+			player:hud_change(player_wind_icon_ids[player:get_player_name()], "text", "")
+		end
+
+		if player:get_meta():get_float("wetness") > 0 then
+			player:hud_change(player_wet_icon_ids[player:get_player_name()], "text", "winter_icon_wet.png")
+		else
+			player:hud_change(player_wet_icon_ids[player:get_player_name()], "text", "")
+		end
 	end
 end)
 
