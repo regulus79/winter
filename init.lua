@@ -17,6 +17,8 @@ dofile(core.get_modpath("winter") .. "/debug.lua")
 dofile(core.get_modpath("winter") .. "/hunger.lua")
 dofile(core.get_modpath("winter") .. "/clothing.lua")
 dofile(core.get_modpath("winter") .. "/snowblocks.lua")
+dofile(core.get_modpath("winter") .. "/sound.lua")
+dofile(core.get_modpath("winter") .. "/give_initial_stuff.lua")
 
 
 core.register_on_newplayer(function(player)

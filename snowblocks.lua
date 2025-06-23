@@ -1,4 +1,6 @@
 
+winter.snow_trudging_temp_penalty = 0.1
+
 
 local num_snow_heights = 4
 
@@ -24,7 +26,7 @@ if core.get_modpath("default") then
 				type = "fixed",
 				fixed = {
 					-- Having a taller but thinner inner collision box to make it easier to climb like stairs
-					{-0.4, -0.5, -0.4, 0.4, -0.25, 0.4},
+					{-0.4, -0.5, -0.4, 0.4, -0.3, 0.4},
 					--{-0.5, -0.5, -0.5, 0.5, -0.4, 0.5},
 				}
 			},
@@ -70,6 +72,7 @@ if core.get_modpath("default") then
 		nodenames = {"default:snow", "default:snowblock"},
 		run_at_every_load = true,
 		action = function(pos, node, dtime_s)
+			if core.get_node(pos + vector.new(0,1,0)).name ~= "air" then return end
 			local all_surrounding_nodes =
 				((core.get_node(pos + vector.new(1,0,0)).name ~= "air") and 1 or 0)
 				+ ((core.get_node(pos + vector.new(-1,0,0)).name ~= "air") and 1 or 0)
@@ -88,6 +91,9 @@ if core.get_modpath("default") then
 					local nodenumber = tonumber(string.sub(nodename, -1))
 					if nodenumber > 1 then
 						core.set_node(player:get_pos(), {name = "winter:snow" .. (nodenumber - 1)})
+						-- Make the player a tiny bit colder
+						-- TODO make this work with thermal constants
+						player:get_meta():set_float("body_temperature", player:get_meta():get_float("body_temperature") - winter.snow_trudging_temp_penalty * dtime)
 					end
 				end
 			end
