@@ -96,6 +96,7 @@ end)
 
 core.register_chatcommand("debuginfo", {
 	description = "Toggle the winter debug display (temperature, wetness, heat loss, metabolism, etc) for your player",
+	privs = {server = 1},
 	func = function(name, param)
 		player_debug_enabled[name] = not player_debug_enabled[name]
 	end
@@ -110,6 +111,7 @@ winter.invincible_players = {}
 
 core.register_chatcommand("alwayswarm", {
 	description = "Make player invincible to cold",
+	privs = {server = 1},
 	func = function(name, param)
 		winter.invincible_players[name] = not winter.invincible_players[name]
 		if winter.invincible_players[name] then
@@ -125,6 +127,7 @@ core.register_chatcommand("alwayswarm", {
 
 core.register_chatcommand("resetheat", {
 	description = "Reset player body temp and wetness",
+	privs = {server = 1},
 	func = function(name, param)
 		local player = core.get_player_by_name(name)
 		player:get_meta():set_float("body_temperature", winter.target_body_temperature)
@@ -134,6 +137,7 @@ core.register_chatcommand("resetheat", {
 
 core.register_chatcommand("settemp", {
 	description = "Set your current body temperature",
+	privs = {server = 1},
 	func = function(name, param)
 		if not tonumber(param) then return end
 		local player = core.get_player_by_name(name)

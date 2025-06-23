@@ -108,7 +108,7 @@ local update_snow_particles = function(player)
 		object_collision = true,
 		playername = player:get_player_name(),
 		texture = {
-			name = "default_snow.png",
+			name = "winter_snow_particle.png",
 		},
 		glow = 3,
 
