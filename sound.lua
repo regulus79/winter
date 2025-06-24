@@ -13,10 +13,8 @@ local wind_very_lowpassed_sound_handles = {}
 local wind_volume = 0.1
 
 core.register_on_joinplayer(function(player)
-	core.debug("Heyy")
 	wind_sound_handles[player:get_player_name()] = core.sound_play({name = "wind2", gain = 0.1, fade = 1.0}, {to_player = player:get_player_name(), loop = true})
 	wind_lowpassed_sound_handles[player:get_player_name()] = core.sound_play({name = "wind2_lowpass1", gain = 0.1, fade = 1.0}, {to_player = player:get_player_name(), loop = true})
-	-- Boosting gain of bass because you can barely hear it for somee reason?
 	wind_very_lowpassed_sound_handles[player:get_player_name()] = core.sound_play({name = "wind2_lowpass2", gain = 0.1, fade = 1.0}, {to_player = player:get_player_name(), loop = true})
 end)
 
