@@ -26,14 +26,14 @@ local random_intensity = function(period, seedish)
 end
 
 winter.general_weather_intensity = function(pos)
-	return math.max(0, random_intensity(300, 0)^2 + pos.y / 50)
+	return math.max(0, random_intensity(300, 0)^2 + pos.y / 200)
 end
 
 winter.wind = function(pos)
 	return 10 * vector.new(math.cos(random_intensity(600, 2)), 0, math.cos(random_intensity(600, 2))) * winter.general_weather_intensity(pos)
 end
 winter.fog = function(pos)
-	return math.max(10, 80 - 60 * winter.general_weather_intensity(pos))
+	return math.max(10, 300 - 200 * winter.general_weather_intensity(pos))
 end
 winter.snowfall_density = function(pos)
 	return math.max(0.1, 3 * winter.general_weather_intensity(pos))
