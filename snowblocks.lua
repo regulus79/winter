@@ -14,7 +14,7 @@ for i = 1,num_snow_heights do
 		wield_image = has_default and "default_snowball.png" or "",
 		paramtype = "light",
 		buildable_to = i ~= num_snow_heights,
-		floodable = true,
+		floodable = i ~= num_snow_heights,
 		drawtype = "nodebox",
 		node_box = {
 			type = "fixed",

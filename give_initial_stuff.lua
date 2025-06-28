@@ -1,7 +1,7 @@
 
 
 
-
+--[[
 core.register_on_newplayer(function(player)
 	local inv = player:get_inventory()
 	core.debug(dump(inv:get_lists()))
@@ -18,3 +18,4 @@ core.register_on_newplayer(function(player)
 		inv:add_item("main", "tcj_clothing:boots")
 	end
 end)
+]]

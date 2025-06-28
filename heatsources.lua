@@ -12,6 +12,12 @@ winter.heat_nodes = {
 	["default:torch_wall"] = 3,
 	["default:torch"] = 3,
 	["default:furnace_active"] = 50,
+	["tcj_fire:stick_bundle_burning1"] = 10,
+	["tcj_fire:stick_bundle_burning2"] = 20,
+	["tcj_fire:stick_bundle_burning3"] = 30,
+	["tcj_fire:stick_bundle_burning4"] = 40,
+	["tcj_fire:stick_bundle_burning5"] = 50,
+	["tcj_fire:stick_bundle_burning6"] = 60,
 }
 local heat_nodenames = {}
 for k,_ in pairs(winter.heat_nodes) do heat_nodenames[#heat_nodenames + 1] = k end

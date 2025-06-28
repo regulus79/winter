@@ -17,6 +17,9 @@ core.register_globalstep(function()
 end)
 
 
+winter.base_weather_intensity = 0
+winter.target_base_weather_intensity = 0
+
 local random_intensity = function(period, seedish)
 	if weather_noise then
 		return weather_noise:get_2d({x = core.get_gametime() / period, y = seedish * 100})
@@ -26,7 +29,7 @@ local random_intensity = function(period, seedish)
 end
 
 winter.general_weather_intensity = function(pos)
-	return math.max(0, random_intensity(300, 0)^2 + pos.y / 200)
+	return math.max(0, winter.base_weather_intensity + random_intensity(300, 0)^2 + pos.y / 200)
 end
 
 winter.wind = function(pos)
@@ -39,10 +42,15 @@ winter.snowfall_density = function(pos)
 	return math.max(0.1, 3 * winter.general_weather_intensity(pos))
 end
 
-
 winter.is_in_winter_storm = function(player)
 	return winter.general_weather_intensity(player:get_pos()) > 1
 end
+
+
+
+
+
+
 
 -- Returns the current temperature due to weather variations/altitude at pos
 -- Does not take into account the shelter, wind, or fire
@@ -138,4 +146,5 @@ winter.register_timer("sky_and_particle_update", 1, function(dtime)
 		update_snow_particles(player)
 		update_sky(player)
 	end
+	winter.base_weather_intensity = winter.base_weather_intensity + 0.05 * (winter.target_base_weather_intensity - winter.base_weather_intensity)
 end)
